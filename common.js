@@ -1,298 +1,266 @@
-// Common Utilities and Helpers
-// File: js/common.js
+/**
+ * Common Utilities & Helpers
+ * Lokasi: frontend/js/common.js
+ * Purpose: Toast, Validator, Storage, DateFormatter utilities
+ */
 
-// Toast notification function
-function showToast(message, type = 'info', duration = 3000) {
-    // Remove existing toasts
-    const existingToast = document.querySelector('.toast');
-    if (existingToast) {
-        existingToast.remove();
-    }
+// ==================== TOAST NOTIFICATIONS ====================
+class Toast {
+    static createContainer() {
+        let container = document.getElementById('toast-container');
+        if (container) return container;
 
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icon = {
-        'success': '✓',
-        'error': '✕',
-        'warning': '⚠',
-        'info': 'ℹ'
-    }[type] || 'ℹ';
-
-    toast.innerHTML = `
-        <span class="toast-icon">${icon}</span>
-        <span class="toast-message">${escapeHtml(message)}</span>
-        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-    `;
-
-    document.body.appendChild(toast);
-
-    // Auto remove after duration
-    setTimeout(() => {
-        toast.classList.add('toast-fade-out');
-        setTimeout(() => toast.remove(), 300);
-    }, duration);
-}
-
-// Escape string to prevent basic XSS when inserting into HTML
-function escapeHtml(input) {
-    if (input === null || input === undefined) return '';
-    const str = String(input);
-    return str.replace(/[&<>"'`=\/]/g, function (s) {
-        return ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;',
-            '`': '&#96;',
-            '=': '&#61;',
-            '/': '&#47;'
-        })[s];
-    });
-}
-
-// Format date to readable string
-function formatDate(dateString, format = 'long') {
-    const date = new Date(dateString);
-
-    if (format === 'short') {
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-    }
-
-    return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-}
-
-// Format date to ISO string for input fields
-function formatDateForInput(dateString) {
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
-}
-
-// Debounce function for search inputs
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Confirm dialog with custom message
-function confirmAction(message, callback) {
-    const result = confirm(message);
-    if (result && callback) {
-        callback();
-    }
-    return result;
-}
-
-// Show loading overlay
-function showLoadingOverlay(show = true) {
-    let overlay = document.getElementById('loadingOverlay');
-
-    if (!overlay && show) {
-        overlay = document.createElement('div');
-        overlay.id = 'loadingOverlay';
-        overlay.className = 'loading-overlay';
-        overlay.innerHTML = `
-            <div class="loading-spinner">
-                <div class="spinner"></div>
-                <p>Loading...</p>
-            </div>
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            pointer-events: auto;
         `;
-        document.body.appendChild(overlay);
+        document.body.appendChild(container);
+        return container;
     }
 
-    if (overlay) {
-        overlay.style.display = show ? 'flex' : 'none';
+    static show(message, type = 'info', duration = 3000) {
+        const container = this.createContainer();
+        
+        const toast = document.createElement('div');
+        const bgColor = {
+            success: '#4CAF50',
+            error: '#f44336',
+            warning: '#ff9800',
+            info: '#2196F3',
+        }[type] || '#2196F3';
+
+        toast.style.cssText = `
+            padding: 16px 20px;
+            margin: 10px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            background-color: ${bgColor};
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            max-width: 400px;
+        `;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
     }
+
+    static success(msg) { this.show(msg, 'success'); }
+    static error(msg) { this.show(msg, 'error'); }
+    static warning(msg) { this.show(msg, 'warning'); }
+    static info(msg) { this.show(msg, 'info'); }
 }
 
-// Format file size
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-}
-
-// Copy to clipboard
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showToast('Copied to clipboard', 'success');
-    }).catch(err => {
-        showToast('Failed to copy', 'error');
-        console.error('Copy failed:', err);
-    });
-}
-
-// Export table to CSV
-function exportTableToCSV(tableId, filename = 'export.csv') {
-    const table = document.getElementById(tableId);
-    if (!table) return;
-
-    let csv = [];
-    const rows = table.querySelectorAll('tr');
-
-    for (let row of rows) {
-        let rowData = [];
-        const cols = row.querySelectorAll('td, th');
-
-        for (let col of cols) {
-            rowData.push('"' + col.textContent.trim().replace(/"/g, '""') + '"');
+// ==================== VALIDATOR ====================
+const Validator = {
+    email: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    phone: (phone) => /^[\d\s\-\+\(\)]+$/.test(phone) && phone.length >= 10,
+    date: (date) => !isNaN(Date.parse(date)),
+    required: (value) => value && value.trim().length > 0,
+    minLength: (value, min) => value && value.length >= min,
+    maxLength: (value, max) => value && value.length <= max,
+    number: (value) => !isNaN(value) && value !== '',
+    url: (url) => {
+        try {
+            new URL(url);
+            return true;
+        } catch (e) {
+            return false;
         }
+    },
+};
 
-        csv.push(rowData.join(','));
-    }
-
-    const csvContent = csv.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
-
-    showToast('Table exported successfully', 'success');
-}
-
-// Print page or element
-function printElement(elementId) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-
-    const printWindow = window.open('', '', 'height=600,width=800');
-    printWindow.document.write('<html><head><title>Print</title>');
-    printWindow.document.write('<link rel="stylesheet" href="css/print.css">');
-    printWindow.document.write('</head><body>');
-    // Clone and sanitize the element before printing to avoid executing scripts or inline handlers
-    const clone = element.cloneNode(true);
-
-    // Remove script tags and inline event handlers
-    function sanitizeNode(node) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-            if (node.tagName === 'SCRIPT') {
-                node.remove();
-                return;
-            }
-
-            // Remove attributes that start with "on" (onclick, onmouseover, etc.)
-            [...node.attributes].forEach(attr => {
-                if (attr.name && attr.name.toLowerCase().startsWith('on')) {
-                    node.removeAttribute(attr.name);
-                }
-            });
+// ==================== STORAGE ====================
+const Storage = {
+    set: (key, value) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (e) {
+            console.error('Storage error:', e);
+            return false;
         }
+    },
+    
+    get: (key, defaultValue = null) => {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : defaultValue;
+        } catch (e) {
+            console.error('Storage error:', e);
+            return defaultValue;
+        }
+    },
+    
+    remove: (key) => {
+        try {
+            localStorage.removeItem(key);
+            return true;
+        } catch (e) {
+            console.error('Storage error:', e);
+            return false;
+        }
+    },
+    
+    clear: () => {
+        try {
+            localStorage.clear();
+            return true;
+        } catch (e) {
+            console.error('Storage error:', e);
+            return false;
+        }
+    },
+};
 
-        // Recurse into children (use static NodeList snapshot)
-        const children = Array.from(node.childNodes);
-        for (const child of children) {
-            sanitizeNode(child);
+// ==================== DATE FORMATTER ====================
+const DateFormatter = {
+    format: (date, fmt = 'DD/MM/YYYY') => {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        
+        return fmt
+            .replace('DD', day)
+            .replace('MM', month)
+            .replace('YYYY', year)
+            .replace('HH', hours)
+            .replace('mm', minutes);
+    },
+    
+    relative: (date) => {
+        const now = new Date();
+        const diff = now - new Date(date);
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        
+        if (seconds < 60) return 'just now';
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        if (days < 7) return `${days}d ago`;
+        return DateFormatter.format(date);
+    },
+};
+
+// ==================== ERROR HANDLER ====================
+const handleApiError = (error) => {
+    console.error('API Error:', error);
+    
+    if (error.message.includes('401')) {
+        Toast.error('Session expired. Please login again.');
+        window.location.href = '/login.html';
+    } else if (error.message.includes('403')) {
+        Toast.error('You do not have permission for this action.');
+    } else if (error.message.includes('404')) {
+        Toast.error('Resource not found.');
+    } else if (error.message.includes('500')) {
+        Toast.error('Server error. Please try again later.');
+    } else {
+        Toast.error(error.message || 'An error occurred');
+    }
+};
+
+// ==================== ANIMATIONS ====================
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
         }
     }
-
-    sanitizeNode(clone);
-    printWindow.document.body.appendChild(clone);
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.print();
-}
-
-// Validate email format
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-// Validate phone number (Indonesian format)
-function validatePhone(phone) {
-    const re = /^(\+62|62|0)[0-9]{9,12}$/;
-    return re.test(phone.replace(/[\s-]/g, ''));
-}
-
-// Get query parameter from URL
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-}
-
-// Update query parameter in URL
-function updateQueryParam(param, value) {
-    const url = new URL(window.location);
-    url.searchParams.set(param, value);
-    window.history.pushState({}, '', url);
-}
-
-// Check if user has specific role
-function hasRole(roles) {
-    const user = api.getCurrentUser();
-    if (!user) return false;
-
-    if (Array.isArray(roles)) {
-        return roles.includes(user.role);
-    }
-    return user.role === roles;
-}
-
-// Show/hide element based on role
-function roleBasedDisplay() {
-    const elements = document.querySelectorAll('[data-role]');
-    const user = api.getCurrentUser();
-
-    elements.forEach(el => {
-        const allowedRoles = el.dataset.role.split(',');
-        if (!allowedRoles.includes(user.role)) {
-            el.style.display = 'none';
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
         }
-    });
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+    
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 3px solid #0066cc;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
+// ==================== UTILITY FUNCTIONS ====================
+const Utils = {
+    // Debounce function for events
+    debounce: (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+    
+    // Format number as currency
+    formatCurrency: (amount, currency = 'IDR') => {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: currency,
+        }).format(amount);
+    },
+    
+    // Get query parameters
+    getQueryParam: (param) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    },
+    
+    // Generate unique ID
+    generateId: () => {
+        return 'id-' + Math.random().toString(36).substr(2, 9);
+    },
+    
+    // Deep copy object
+    deepCopy: (obj) => {
+        return JSON.parse(JSON.stringify(obj));
+    },
+};
+
+// Export to global scope
+if (typeof window !== 'undefined') {
+    window.Toast = Toast;
+    window.Validator = Validator;
+    window.Storage = Storage;
+    window.DateFormatter = DateFormatter;
+    window.handleApiError = handleApiError;
+    window.Utils = Utils;
 }
-
-// Initialize common features
-document.addEventListener('DOMContentLoaded', () => {
-    // Apply role-based display
-    roleBasedDisplay();
-
-    // Add click handlers for copy buttons
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const text = e.target.dataset.copy;
-            if (text) copyToClipboard(text);
-        });
-    });
-
-    // Add handlers for export buttons
-    document.querySelectorAll('.export-csv-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const tableId = e.target.dataset.table;
-            if (tableId) exportTableToCSV(tableId);
-        });
-    });
-});
-
-// Global error handler
-window.addEventListener('error', (e) => {
-    console.error('Global error:', e.error);
-    // You can send to error tracking service here
-});
-
-// Handle unhandled promise rejections
-window.addEventListener('unhandledrejection', (e) => {
-    console.error('Unhandled promise rejection:', e.reason);
-});
