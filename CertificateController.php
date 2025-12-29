@@ -2,142 +2,214 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\Personnel;
 use Illuminate\Http\Request;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class CertificateController extends Controller
 {
+    /**
+     * Get all certificates
+     * GET /api/certificates
+     */
     public function index(Request $request)
     {
-        $query = Certificate::with(['personnel.company', 'issuer']);
+        try {
+            $query = Certificate::with('personnel');
 
-        // Filter by status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
+            // Filter by status
+            if ($request->has('status')) {
+                $query->where('status', $request->get('status'));
+            }
+
+            // Filter by expiry
+            if ($request->has('expiry_status')) {
+                $expiryStatus = $request->get('expiry_status');
+                $today = now();
+                $thirtyDaysFromNow = now()->addDays(30);
+
+                if ($expiryStatus == 'expired') {
+                    $query->where('expiry_date', '<', $today);
+                } elseif ($expiryStatus == 'expiring_soon') {
+                    $query->whereBetween('expiry_date', [$today, $thirtyDaysFromNow]);
+                } elseif ($expiryStatus == 'valid') {
+                    $query->where('expiry_date', '>', $thirtyDaysFromNow);
+                }
+            }
+
+            // Filter by personnel
+            if ($request->has('personnel_id')) {
+                $query->where('personnel_id', $request->get('personnel_id'));
+            }
+
+            $certificates = $query->paginate(15);
+
+            return response()->json([
+                'success' => true,
+                'data' => $certificates,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get certificates error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
         }
-
-        // Filter expiring soon
-        if ($request->has('expiring_soon')) {
-            $query->expiringSoon($request->get('days', 30));
-        }
-
-        // Search by certificate number
-        if ($request->has('search')) {
-            $query->where('certificate_number', 'like', "%{$request->search}%");
-        }
-
-        $certificates = $query->latest()->paginate($request->get('per_page', 15));
-
-        return response()->json([
-            'success' => true,
-            'data' => $certificates,
-        ]);
     }
 
+    /**
+     * Get single certificate by ID
+     * GET /api/certificates/{id}
+     */
+    public function show(Request $request, $id)
+    {
+        try {
+            $certificate = Certificate::with('personnel')->find($id);
+
+            if (!$certificate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Certificate not found',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $certificate,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get certificate error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
+    }
+
+    /**
+     * Create new certificate
+     * POST /api/certificates
+     */
     public function store(Request $request)
     {
-        // Only admin and superadmin can issue certificates
-        if (!$request->user()->isAdmin() && !$request->user()->isSuperAdmin()) {
+        try {
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'personnel_id' => 'required|integer|exists:personnel,id',
+                'certificate_type' => 'required|string|max:255',
+                'certificate_number' => 'required|string|unique:certificates|max:255',
+                'issue_date' => 'required|date',
+                'expiry_date' => 'required|date|after:issue_date',
+                'issuer' => 'nullable|string|max:255',
+                'status' => 'required|in:active,inactive,expired',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $certificate = Certificate::create($request->all());
+            Log::info('Certificate created', ['certificate_id' => $certificate->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Certificate created successfully',
+                'data' => $certificate,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Create certificate error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized to issue certificates',
-            ], 403);
+                'message' => 'Server error',
+            ], 500);
         }
-
-        $validated = $request->validate([
-            'personnel_id' => 'required|exists:personnel,id',
-            'certificate_type' => 'required|string|max:50',
-            'issue_date' => 'required|date',
-            'expiry_date' => 'required|date|after:issue_date',
-        ]);
-
-        // Generate certificate number
-        $certificateNumber = 'SBTC-' . date('Y') . '-' . str_pad(Certificate::count() + 1, 5, '0', STR_PAD_LEFT);
-
-        // Generate QR Code
-        $qrCode = base64_encode(QrCode::format('png')
-            ->size(300)
-            ->generate(route('certificates.verify', $certificateNumber)));
-
-        $certificate = Certificate::create([
-            'personnel_id' => $validated['personnel_id'],
-            'certificate_type' => $validated['certificate_type'],
-            'certificate_number' => $certificateNumber,
-            'issue_date' => $validated['issue_date'],
-            'expiry_date' => $validated['expiry_date'],
-            'status' => 'active',
-            'issued_by' => $request->user()->id,
-            'qr_code' => $qrCode,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Certificate issued successfully',
-            'data' => $certificate->load(['personnel', 'issuer']),
-        ], 201);
     }
 
-    public function show($id)
-    {
-        $certificate = Certificate::with(['personnel.company', 'issuer'])->findOrFail($id);
-
-        return response()->json([
-            'success' => true,
-            'data' => $certificate,
-        ]);
-    }
-
+    /**
+     * Update certificate
+     * PUT /api/certificates/{id}
+     */
     public function update(Request $request, $id)
     {
-        $certificate = Certificate::findOrFail($id);
+        try {
+            $certificate = Certificate::find($id);
 
-        $validated = $request->validate([
-            'expiry_date' => 'sometimes|date',
-            'status' => 'sometimes|in:active,expired,revoked',
-        ]);
+            if (!$certificate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Certificate not found',
+                ], 404);
+            }
 
-        $certificate->update($validated);
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'certificate_type' => 'sometimes|required|string|max:255',
+                'issue_date' => 'sometimes|required|date',
+                'expiry_date' => 'sometimes|required|date',
+                'issuer' => 'nullable|string|max:255',
+                'status' => 'sometimes|required|in:active,inactive,expired',
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Certificate updated successfully',
-            'data' => $certificate->fresh(['personnel', 'issuer']),
-        ]);
-    }
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
 
-    public function destroy($id)
-    {
-        $certificate = Certificate::findOrFail($id);
-        $certificate->revoke();
+            $certificate->update($request->all());
+            Log::info('Certificate updated', ['certificate_id' => $certificate->id]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Certificate revoked successfully',
-        ]);
-    }
-
-    public function verify($certificateNumber)
-    {
-        $certificate = Certificate::where('certificate_number', $certificateNumber)
-                                  ->with(['personnel.company'])
-                                  ->first();
-
-        if (!$certificate) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Certificate updated successfully',
+                'data' => $certificate,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Update certificate error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Certificate not found',
-            ], 404);
+                'message' => 'Server error',
+            ], 500);
         }
+    }
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'certificate' => $certificate,
-                'is_valid' => $certificate->status === 'active' && !$certificate->is_expired,
-            ],
-        ]);
+    /**
+     * Delete certificate
+     * DELETE /api/certificates/{id}
+     */
+    public function destroy(Request $request, $id)
+    {
+        try {
+            $certificate = Certificate::find($id);
+
+            if (!$certificate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Certificate not found',
+                ], 404);
+            }
+
+            $certificate->delete();
+            Log::info('Certificate deleted', ['certificate_id' => $id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Certificate deleted successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Delete certificate error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
     }
 }
