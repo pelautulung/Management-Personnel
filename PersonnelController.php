@@ -2,115 +2,279 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Personnel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class PersonnelController extends Controller
 {
+    /**
+     * Get all personnel with optional filtering
+     * GET /api/personnel
+     */
     public function index(Request $request)
     {
-        $query = Personnel::with(['company', 'creator', 'certificates']);
+        try {
+            $query = Personnel::query();
 
-        // Filter by company for contractors
-        if ($request->user()->isContractor()) {
-            $query->where('company_id', $request->user()->company_id);
+            // Filter by company for contractors
+            if ($request->user() && $request->user()->isContractor()) {
+                $query->where('company_id', $request->user()->company_id);
+            }
+
+            // Filter by search term
+            if ($request->has('search')) {
+                $search = $request->get('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('employee_id', 'like', "%{$search}%");
+                });
+            }
+
+            // Filter by department
+            if ($request->has('department')) {
+                $query->where('department', $request->get('department'));
+            }
+
+            // Filter by status
+            if ($request->has('status')) {
+                $query->where('status', $request->get('status'));
+            }
+
+            $personnel = $query->paginate(15);
+
+            return response()->json([
+                'success' => true,
+                'data' => $personnel,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get personnel error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
         }
-
-        // Search
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('employee_id', 'like', "%{$search}%")
-                  ->orWhere('position', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by company
-        if ($request->has('company_id')) {
-            $query->where('company_id', $request->company_id);
-        }
-
-        $personnel = $query->latest()->paginate($request->get('per_page', 15));
-
-        return response()->json([
-            'success' => true,
-            'data' => $personnel,
-        ]);
     }
 
+    /**
+     * Get single personnel by ID
+     * GET /api/personnel/{id}
+     */
+    public function show(Request $request, $id)
+    {
+        try {
+            $personnel = Personnel::find($id);
+
+            if (!$personnel) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Personnel not found',
+                ], 404);
+            }
+
+            // Check authorization for contractors
+            if ($request->user() && $request->user()->isContractor() && 
+                $personnel->company_id !== $request->user()->company_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                ], 403);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $personnel,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get personnel error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
+    }
+
+    /**
+     * Create new personnel
+     * POST /api/personnel
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'company_id' => 'required|exists:companies,id',
-            'full_name' => 'required|string|max:255',
-            'position' => 'required|string|max:255',
-            'employee_id' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'nationality' => 'nullable|string|max:100',
-        ]);
+        try {
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:personnel|max:255',
+                'employee_id' => 'required|string|unique:personnel|max:255',
+                'department' => 'required|string|max:255',
+                'position' => 'required|string|max:255',
+                'phone' => 'nullable|string|max:20',
+                'company_id' => 'required|integer|exists:companies,id',
+                'status' => 'required|in:active,inactive,on_leave',
+            ]);
 
-        // Contractors can only add personnel to their own company
-        if ($request->user()->isContractor()) {
-            $validated['company_id'] = $request->user()->company_id;
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $personnel = Personnel::create($request->all());
+            Log::info('Personnel created', ['personnel_id' => $personnel->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Personnel created successfully',
+                'data' => $personnel,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Create personnel error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
         }
-
-        $validated['created_by'] = $request->user()->id;
-
-        $personnel = Personnel::create($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Personnel created successfully',
-            'data' => $personnel->load(['company', 'creator']),
-        ], 201);
     }
 
-    public function show($id)
-    {
-        $personnel = Personnel::with(['company', 'creator', 'certificates', 'documents', 'submissions'])
-                              ->findOrFail($id);
-
-        return response()->json([
-            'success' => true,
-            'data' => $personnel,
-        ]);
-    }
-
+    /**
+     * Update personnel
+     * PUT /api/personnel/{id}
+     */
     public function update(Request $request, $id)
     {
-        $personnel = Personnel::findOrFail($id);
+        try {
+            $personnel = Personnel::find($id);
 
-        $validated = $request->validate([
-            'full_name' => 'sometimes|string|max:255',
-            'position' => 'sometimes|string|max:255',
-            'employee_id' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'nationality' => 'nullable|string|max:100',
-        ]);
+            if (!$personnel) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Personnel not found',
+                ], 404);
+            }
 
-        $personnel->update($validated);
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'name' => 'sometimes|required|string|max:255',
+                'email' => 'sometimes|required|email|unique:personnel,email,' . $id . '|max:255',
+                'department' => 'sometimes|required|string|max:255',
+                'position' => 'sometimes|required|string|max:255',
+                'phone' => 'nullable|string|max:20',
+                'status' => 'sometimes|required|in:active,inactive,on_leave',
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Personnel updated successfully',
-            'data' => $personnel->fresh(['company', 'creator']),
-        ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $personnel->update($request->all());
+            Log::info('Personnel updated', ['personnel_id' => $personnel->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Personnel updated successfully',
+                'data' => $personnel,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Update personnel error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
     }
 
-    public function destroy($id)
+    /**
+     * Delete personnel
+     * DELETE /api/personnel/{id}
+     */
+    public function destroy(Request $request, $id)
     {
-        $personnel = Personnel::findOrFail($id);
-        $personnel->delete();
+        try {
+            $personnel = Personnel::find($id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Personnel deleted successfully',
-        ]);
+            if (!$personnel) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Personnel not found',
+                ], 404);
+            }
+
+            $personnel->delete();
+            Log::info('Personnel deleted', ['personnel_id' => $id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Personnel deleted successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Delete personnel error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk import personnel
+     * POST /api/personnel/bulk-import
+     */
+    public function bulkImport(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'personnel' => 'required|array',
+                'personnel.*.name' => 'required|string|max:255',
+                'personnel.*.email' => 'required|email|max:255',
+                'personnel.*.employee_id' => 'required|string|max:255',
+                'personnel.*.department' => 'required|string|max:255',
+                'personnel.*.position' => 'required|string|max:255',
+                'personnel.*.company_id' => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $created = 0;
+            $failed = 0;
+
+            foreach ($request->personnel as $data) {
+                try {
+                    Personnel::create($data);
+                    $created++;
+                } catch (\Exception $e) {
+                    Log::warning('Personnel import error: ' . $e->getMessage());
+                    $failed++;
+                }
+            }
+
+            Log::info('Bulk import completed', ['created' => $created, 'failed' => $failed]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bulk import completed',
+                'created' => $created,
+                'failed' => $failed,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Bulk import error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
     }
 }
