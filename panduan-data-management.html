@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Data Management - SBTC Zona 5</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .guide-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #0066cc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .step h3 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .code-block {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .sample-data {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .file-format {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .format-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #0066cc;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0052cc;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .back-link {
+            color: #0066cc;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+    </style>
+    <script src="js/storage.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-link">← Kembali ke Dashboard</a>
+            <h1>📚 Panduan Data Management SBTC</h1>
+            <p>Panduan lengkap untuk menggunakan fitur Data Management dengan Local Storage</p>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🎯 Cara Menggunakan Data Management</h2>
+            
+            <div class="step">
+                <h3>Step 1: Akses Data Management</h3>
+                <p>1. Login sebagai <strong>Admin</strong> atau <strong>Superadmin</strong></p>
+                <p>2. Klik menu <strong>"Data Management"</strong> di navigasi atas</p>
+                <p>3. Pilih salah satu opsi:</p>
+                <ul>
+                    <li><strong>Import Data</strong> - Upload file Excel/CSV</li>
+                    <li><strong>Export Data</strong> - Download data dalam format CSV</li>
+                    <li><strong>Clear Data</strong> - Hapus semua data (dengan konfirmasi)</li>
+                    <li><strong>Data Statistics</strong> - Lihat ringkasan data</li>
+                </ul>
+            </div>
+            
+            <div class="step">
+                <h3>Step 2: Import Data dari Excel/CSV</h3>
+                <p>1. Pilih <strong>"Import Data"</strong></p>
+                <p>2. Pilih jenis data yang akan diimport:</p>
+                <ul>
+                    <li>📋 <strong>Pengajuan</strong> - Data pengajuan sertifikasi</li>
+                    <li>🏢 <strong>Kontraktor</strong> - Data perusahaan kontraktor</li>
+                    <li>👤 <strong>Personnel</strong> - Data pekerja/personnel</li>
+                    <li>🏆 <strong>Sertifikat</strong> - Data sertifikat yang diterbitkan</li>
+                </ul>
+                <p>3. Upload file dengan cara:</p>
+                <ul>
+                    <li>Klik area upload untuk memilih file</li>
+                    <li>Atau drag & drop file ke area upload</li>
+                </ul>
+                <p>4. File yang didukung: <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code> (maksimum 10MB)</p>
+            </div>
+            
+            <div class="step">
+                <h3>Step 3: Mapping Kolom</h3>
+                <p>1. Setelah file diupload, sistem akan menampilkan preview data</p>
+                <p>2. Lakukan mapping kolom dari file Excel/CSV ke field sistem</p>
+                <p>3. Kolom yang ditandai <span style="color: red;">*</span> adalah wajib</p>
+                <p>4. Sistem akan otomatis mencocokkan kolom berdasarkan nama yang mirip</p>
+                <p>5. Klik <strong>"Import Data"</strong> untuk memproses</p>
+            </div>
+            
+            <div class="step">
+                <h3>Step 4: Data Tersimpan Otomatis</h3>
+                <p>1. Data yang diimport akan langsung tersimpan di Local Storage browser</p>
+                <p>2. Data akan tetap ada meskipun browser ditutup</p>
+                <p>3. Dashboard akan otomatis update dengan data baru</p>
+                <p>4. Statistik akan menampilkan data real-time</p>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>💾 Cara Kerja Local Storage</h2>
+            
+            <div class="info-box">
+                <h3>🔍 Apa itu Local Storage?</h3>
+                <p>Local Storage adalah fitur browser yang memungkinkan website menyimpan data di komputer Anda secara lokal. Data ini akan tetap tersimpan meskipun browser ditutup atau komputer di-restart.</p>
+            </div>
+            
+            <div class="success-box">
+                <h3>✅ Keuntungan Local Storage</h3>
+                <ul>
+                    <li>Data tersimpan di laptop/komputer Anda secara lokal</li>
+                    <li>Tidak memerlukan koneksi internet untuk mengakses data</li>
+                    <li>Data tetap ada meskipun browser ditutup</li>
+                    <li>Performa akses data sangat cepat</li>
+                    <li>Tidak ada biaya hosting database</li>
+                </ul>
+            </div>
+            
+            <div class="warning-box">
+                <h3>⚠️ Perhatian Penting</h3>
+                <ul>
+                    <li>Data hanya tersimpan di browser dan komputer ini saja</li>
+                    <li>Jika menghapus cache/data browser, data akan hilang</li>
+                    <li>Tidak bisa diakses dari komputer/browser lain</li>
+                    <li>Disarankan backup data secara berkala dengan Export</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>📊 Format File untuk Import</h2>
+            
+            <div class="file-format">
+                <div class="format-card">
+                    <h3>📋 Data Pengajuan</h3>
+                    <p>Kolom yang diperlukan:</p>
+                    <ul>
+                        <li><strong>ID Pengajuan</strong> (wajib)</li>
+                        <li><strong>ID Kontraktor</strong> (wajib)</li>
+                        <li><strong>ID Pekerja</strong> (wajib)</li>
+                        <li><strong>Posisi</strong> (wajib)</li>
+                        <li><strong>Tanggal Pengajuan</strong> (wajib)</li>
+                        <li><strong>Status</strong> (wajib)</li>
+                        <li>Catatan (opsional)</li>
+                    </ul>
+                </div>
+                
+                <div class="format-card">
+                    <h3>🏢 Data Kontraktor</h3>
+                    <p>Kolom yang diperlukan:</p>
+                    <ul>
+                        <li><strong>ID Kontraktor</strong> (wajib)</li>
+                        <li><strong>Nama Perusahaan</strong> (wajib)</li>
+                        <li><strong>Jenis Usaha</strong> (wajib)</li>
+                        <li><strong>Alamat</strong> (wajib)</li>
+                        <li><strong>Contact Person</strong> (wajib)</li>
+                        <li>Telepon (opsional)</li>
+                        <li>Email (opsional)</li>
+                    </ul>
+                </div>
+                
+                <div class="format-card">
+                    <h3>👤 Data Personnel</h3>
+                    <p>Kolom yang diperlukan:</p>
+                    <ul>
+                        <li><strong>ID Personnel</strong> (wajib)</li>
+                        <li><strong>ID Kontraktor</strong> (wajib)</li>
+                        <li><strong>Nama Lengkap</strong> (wajib)</li>
+                        <li><strong>NIK</strong> (wajib)</li>
+                        <li><strong>Posisi/Jabatan</strong> (wajib)</li>
+                        <li>Tanggal Lahir (opsional)</li>
+                        <li>Telepon (opsional)</li>
+                        <li>Email (opsional)</li>
+                    </ul>
+                </div>
+                
+                <div class="format-card">
+                    <h3>🏆 Data Sertifikat</h3>
+                    <p>Kolom yang diperlukan:</p>
+                    <ul>
+                        <li><strong>ID Sertifikat</strong> (wajib)</li>
+                        <li><strong>ID Pengajuan</strong> (wajib)</li>
+                        <li><strong>ID Pekerja</strong> (wajib)</li>
+                        <li><strong>Jenis Sertifikat</strong> (wajib)</li>
+                        <li><strong>Tanggal Terbit</strong> (wajib)</li>
+                        <li><strong>Tanggal Kadaluarsa</strong> (wajib)</li>
+                        <li><strong>Status</strong> (wajib)</li>
+                        <li><strong>Nomor Sertifikat</strong> (wajib)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>📝 Contoh Format File CSV</h2>
+            
+            <div class="sample-data">
+                <h3>Contoh Data Pengajuan (CSV):</h3>
+                <div class="code-block">
+ID Pengajuan,ID Kontraktor,ID Pekerja,Posisi,Tanggal Pengajuan,Status,Catatan
+APP001,C001,W001,Driller,2023-06-10,Diajukan,Pengajuan baru
+APP002,C002,W002,Welder,2023-06-15,Direview,Dalam proses review
+APP003,C001,W003,Rigger,2023-06-20,Disetujui,Dokumen lengkap
+                </div>
+            </div>
+            
+            <div class="sample-data">
+                <h3>Contoh Data Kontraktor (CSV):</h3>
+                <div class="code-block">
+ID Kontraktor,Nama Perusahaan,Jenis Usaha,Alamat,Contact Person,Telepon,Email
+C001,PT Drilling Indonesia,Drilling,Jl. Industri No. 123,Budi Santoso,081234567890,budi@drilling.com
+C002,PT Well Services,Well Intervention,Jl. Migas No. 456,Sari Handayani,087654321098,sari@well.com
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🔄 Real-Time Data Updates</h2>
+            
+            <div class="step">
+                <h3>Bagaimana Data Update Real-Time?</h3>
+                <p>1. <strong>Import Data:</strong> Setelah import berhasil, data langsung tersimpan di Local Storage</p>
+                <p>2. <strong>Auto Refresh:</strong> Dashboard dan statistik otomatis update</p>
+                <p>3. <strong>Persistent Storage:</strong> Data tetap ada saat buka aplikasi lagi</p>
+                <p>4. <strong>Merge Data:</strong> Data baru akan digabung dengan data existing</p>
+            </div>
+            
+            <div class="step">
+                <h3>Melihat Perubahan Data</h3>
+                <p>1. Kembali ke Dashboard setelah import</p>
+                <p>2. Lihat statistik yang sudah terupdate</p>
+                <p>3. Check tabel pengajuan terbaru</p>
+                <p>4. Grafik dan persentase otomatis terhitung ulang</p>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>💡 Tips dan Best Practices</h2>
+            
+            <div class="success-box">
+                <h3>✅ Rekomendasi</h3>
+                <ul>
+                    <li>Backup data secara berkala dengan fitur Export</li>
+                    <li>Gunakan ID yang unik untuk setiap record</li>
+                    <li>Pastikan format tanggal konsisten (YYYY-MM-DD)</li>
+                    <li>Validasi data di Excel sebelum import</li>
+                    <li>Import data sedikit demi sedikit untuk testing</li>
+                </ul>
+            </div>
+            
+            <div class="warning-box">
+                <h3>⚠️ Hal yang Harus Dihindari</h3>
+                <ul>
+                    <li>Menghapus cache browser tanpa backup</li>
+                    <li>Menggunakan ID yang sama untuk record berbeda</li>
+                    <li>Upload file yang terlalu besar (>10MB)</li>
+                    <li>Format tanggal yang tidak konsisten</li>
+                    <li>Kolom wajib yang kosong</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🚀 Mulai Menggunakan</h2>
+            
+            <div style="text-align: center; padding: 30px;">
+                <p style="font-size: 18px; margin-bottom: 30px;">Siap untuk mulai menggunakan Data Management?</p>
+                <a href="data-management.html" class="btn btn-primary" style="font-size: 16px; padding: 15px 30px;">
+                    🚀 Buka Data Management
+                </a>
+                <br><br>
+                <a href="index.html" class="btn btn-success">
+                    📊 Kembali ke Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

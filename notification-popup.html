@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Terbaru SBTC</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: rgba(0, 0, 0, 0.6);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .popup-container {
+            background: white;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .popup-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .popup-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .popup-header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .popup-content {
+            padding: 25px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .update-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .update-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .update-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .badge-new {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .badge-improvement {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .badge-important {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .update-title {
+            font-weight: 600;
+            margin: 0 0 10px;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .update-desc {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .update-icon {
+            font-size: 24px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .popup-footer {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .primary-btn {
+            background-color: #0066cc;
+            color: white;
+        }
+        
+        .primary-btn:hover {
+            background-color: #0052cc;
+        }
+        
+        .secondary-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+    <script src="js/storage.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-header">
+            <h2>🎉 Update Terbaru SBTC Zona 5</h2>
+            <p>Versi 2.1.0 - 31 Mei 2025</p>
+            <button class="close-btn" onclick="closePopup()">&times;</button>
+        </div>
+        
+        <div class="popup-content">
+            <div class="update-item">
+                <span class="update-badge badge-new">FITUR BARU</span>
+                <h3 class="update-title">📊 Data Management System</h3>
+                <p class="update-desc">
+                    Kami telah menambahkan fitur Data Management System yang memungkinkan Anda mengimpor dan mengelola data dari file Excel atau CSV. Data disimpan di Local Storage browser sehingga tetap ada meskipun browser ditutup.
+                </p>
+                <ul class="update-desc">
+                    <li>Import data dari Excel/CSV</li>
+                    <li>Export data ke format CSV</li>
+                    <li>Mapping kolom yang fleksibel</li>
+                    <li>Template siap pakai</li>
+                    <li>Statistik dan visualisasi data</li>
+                </ul>
+            </div>
+            
+            <div class="update-item">
+                <span class="update-badge badge-improvement">PENINGKATAN</span>
+                <h3 class="update-title">📈 Real-time Dashboard</h3>
+                <p class="update-desc">
+                    Dashboard sekarang update secara real-time dengan perhitungan data yang lebih akurat. Persentase dan statistik dihitung berdasarkan data aktual dari periode waktu yang dipilih.
+                </p>
+            </div>
+            
+            <div class="update-item">
+                <span class="update-badge badge-improvement">PENINGKATAN</span>
+                <h3 class="update-title">📂 Form Pengajuan SBTC yang Lebih Komprehensif</h3>
+                <p class="update-desc">
+                    Form pengajuan SBTC telah ditingkatkan dengan informasi yang lebih lengkap, termasuk:
+                </p>
+                <ul class="update-desc">
+                    <li>Data personel yang lebih detail</li>
+                    <li>Informasi perusahaan dan kontrak</li>
+                    <li>Posisi untuk Departemen Drilling & Well Intervention</li>
+                    <li>Upload dokumen kompetensi, HSSE, dan SIKA</li>
+                </ul>
+            </div>
+            
+            <div class="update-item">
+                <span class="update-badge badge-important">PENTING</span>
+                <h3 class="update-title">🔄 Panduan Penggunaan Fitur Baru</h3>
+                <p class="update-desc">
+                    Kami telah menyediakan panduan lengkap dan template data untuk membantu Anda menggunakan fitur baru. Klik tombol di bawah untuk mengakses panduan.
+                </p>
+            </div>
+        </div>
+        
+        <div class="popup-footer">
+            <button class="action-btn primary-btn" onclick="window.location.href='data-management.html'">
+                🚀 Coba Data Management
+            </button>
+            <button class="action-btn secondary-btn" onclick="window.location.href='panduan-data-management.html'">
+                📚 Lihat Panduan
+            </button>
+            <button class="action-btn secondary-btn" onclick="closePopup()">
+                Tutup
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function closePopup() {
+            window.close();
+        }
+    </script>
+</body>
+</html>

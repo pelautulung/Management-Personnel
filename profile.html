@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBTC Zona 5 - Profil Pengguna</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/storage.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="xf2c1ffjur.png" alt="SBTC Logo" style="width: 36px; height: auto;">
+                <span>SBTC Zona 5</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" data-section="dashboard">Dashboard</a>
+                <a href="index.html" data-section="pengajuan-baru">Pengajuan Baru</a>
+                <a href="index.html" data-section="review">Review</a>
+                <a href="index.html" data-section="jadwal-interview">Jadwal Interview</a>
+                <a href="index.html" data-section="laporan">Laporan</a>
+                <a href="profile.html" class="active">Profil</a>
+            </div>
+            <div class="user-profile">
+                <span id="profileUsername">Admin PHE ONWJ</span>
+                <div class="avatar" id="profileAvatar">A</div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="profile-container">
+            <div class="profile-sidebar">
+                <div class="profile-image">
+                    <div class="avatar-large" id="profileAvatarLarge">A</div>
+                    <h2 id="profileFullName">Administrator</h2>
+                    <p id="profileRole" class="profile-role">Admin</p>
+                </div>
+                <div class="profile-menu">
+                    <a href="#" class="active" data-tab="personal-info">Informasi Pribadi</a>
+                    <a href="#" data-tab="company-info" data-requires-role="contractor">Informasi Perusahaan</a>
+                    <a href="#" data-tab="security">Keamanan</a>
+                    <a href="#" data-tab="history">Riwayat Aktivitas</a>
+                    <a href="#" data-tab="user-management" data-requires-permission="manageUsers">Manajemen Pengguna</a>
+                    <a href="#" data-tab="job-requirements" data-requires-permission="edit">Persyaratan Pekerjaan</a>
+                    <a href="#" onclick="window.auth.logout(); return false;" class="menu-logout">Logout</a>
+                </div>
+            </div>
+            
+            <div class="profile-content">
+                <!-- Personal Information Tab -->
+                <div class="profile-tab active" id="personal-info">
+                    <h1>Informasi Pribadi</h1>
+                    <form id="personalInfoForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nama Lengkap</label>
+                                <input type="text" id="fullName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="email" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="username" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipe Pengguna</label>
+                                <input type="text" id="userType" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>No. Telepon</label>
+                                <input type="tel" id="phone">
+                            </div>
+                            <div class="form-group">
+                                <label>Terakhir Login</label>
+                                <input type="text" id="lastLogin" readonly>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Company Information Tab -->
+                <div class="profile-tab" id="company-info">
+                    <h1>Informasi Perusahaan</h1>
+                    <form id="companyInfoForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nama Perusahaan</label>
+                                <input type="text" id="companyName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Jenis Usaha</label>
+                                <select id="businessType" required>
+                                    <option value="">Pilih Jenis Usaha</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label>Alamat</label>
+                                <textarea id="companyAddress" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kontak Person</label>
+                                <input type="text" id="contactPerson" required>
+                            </div>
+                            <div class="form-group">
+                                <label>No. Telepon</label>
+                                <input type="tel" id="companyPhone" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>NPWP</label>
+                                <input type="text" id="taxId">
+                            </div>
+                            <div class="form-group">
+                                <label>No. SIUP</label>
+                                <input type="text" id="businessLicense">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="profile-tab" id="security">
+                    <h1>Keamanan</h1>
+                    <form id="securityForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Password Lama</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password Baru</label>
+                                <input type="password" id="newPassword" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Konfirmasi Password Baru</label>
+                                <input type="password" id="confirmPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <!-- Placeholder for balance -->
+                            </div>
+                        </div>
+                        <div class="password-requirements">
+                            <h3>Persyaratan Password:</h3>
+                            <ul>
+                                <li>Minimal 8 karakter</li>
+                                <li>Mengandung huruf besar dan kecil</li>
+                                <li>Mengandung angka</li>
+                                <li>Mengandung karakter khusus (seperti !@#$%^&*)</li>
+                            </ul>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Ubah Password</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Activity History Tab -->
+                <div class="profile-tab" id="history">
+                    <h1>Riwayat Aktivitas</h1>
+                    <div class="filter-controls" style="margin-bottom: 20px;">
+                        <select id="activityFilter">
+                            <option value="all">Semua Aktivitas</option>
+                            <option value="login">Login</option>
+                            <option value="logout">Logout</option>
+                            <option value="edit">Edit Data</option>
+                            <option value="add">Tambah Data</option>
+                            <option value="delete">Hapus Data</option>
+                        </select>
+                        <input type="date" id="dateFilter" placeholder="Filter by date">
+                        <button id="clearHistoryFilter" class="btn-secondary">Clear Filter</button>
+                    </div>
+                    <div class="history-container">
+                        <table class="data-table" id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>TANGGAL & WAKTU</th>
+                                    <th>AKTIVITAS</th>
+                                    <th>DESKRIPSI</th>
+                                    <th>USER AGENT</th>
+                                    <th>IP ADDRESS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- This will be populated with JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="pagination" id="historyPagination">
+                            <span>Menampilkan 0 dari 0 aktivitas</span>
+                            <div class="pagination-controls">
+                                <a href="#" class="pagination-btn">Sebelumnya</a>
+                                <a href="#" class="pagination-btn active">1</a>
+                                <a href="#" class="pagination-btn">Selanjutnya</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Management Tab -->
+                <div class="profile-tab" id="user-management">
+                    <h1>Manajemen Pengguna</h1>
+                    <div class="action-buttons" style="margin-bottom: 20px;">
+                        <button id="addUserBtn" class="btn-primary">+ Tambah Pengguna</button>
+                    </div>
+                    <div class="filter-controls" style="margin-bottom: 20px;">
+                        <input type="text" id="userSearchInput" placeholder="Cari pengguna...">
+                        <select id="userRoleFilter">
+                            <option value="all">Semua Tipe</option>
+                            <option value="superadmin">Super Admin</option>
+                            <option value="admin">Admin</option>
+                            <option value="contractor">Kontraktor</option>
+                            <option value="guest">Tamu</option>
+                        </select>
+                        <select id="userStatusFilter">
+                            <option value="all">Semua Status</option>
+                            <option value="active">Aktif</option>
+                            <option value="pending">Pending</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="inactive">Tidak Aktif</option>
+                        </select>
+                    </div>
+                    <div class="users-container">
+                        <table class="data-table" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>NAMA</th>
+                                    <th>USERNAME</th>
+                                    <th>EMAIL</th>
+                                    <th>TIPE</th>
+                                    <th>STATUS</th>
+                                    <th>TERAKHIR LOGIN</th>
+                                    <th>AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- This will be populated with JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="pagination" id="usersPagination">
+                            <span>Menampilkan 0 dari 0 pengguna</span>
+                            <div class="pagination-controls">
+                                <a href="#" class="pagination-btn">Sebelumnya</a>
+                                <a href="#" class="pagination-btn active">1</a>
+                                <a href="#" class="pagination-btn">Selanjutnya</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job Requirements Tab -->
+                <div class="profile-tab" id="job-requirements">
+                    <h1>Persyaratan Pekerjaan</h1>
+                    <div class="action-buttons" style="margin-bottom: 20px;">
+                        <button id="addJobBtn" class="btn-primary">+ Tambah Posisi</button>
+                    </div>
+                    <div class="job-requirements-container">
+                        <table class="data-table" id="jobRequirementsTable">
+                            <thead>
+                                <tr>
+                                    <th>POSISI</th>
+                                    <th>MIN. PENGALAMAN</th>
+                                    <th>SERTIFIKASI WAJIB</th>
+                                    <th>PERSYARATAN KESEHATAN</th>
+                                    <th>AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobRequirementsTableBody">
+                                <!-- This will be populated with JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal" style="display: none;">
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="userModalTitle">Tambah Pengguna</h3>
+                    <button id="closeUserModal" class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nama Lengkap</label>
+                                <input type="text" id="userFullName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="userEmail" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="userUsername" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipe Pengguna</label>
+                                <select id="userRole" required>
+                                    <option value="">Pilih Tipe Pengguna</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="contractor">Kontraktor</option>
+                                    <option value="guest">Tamu</option>
+                                    <option value="superadmin" data-requires-role="superadmin">Super Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="userPassword">
+                                <small class="help-text">Biarkan kosong jika tidak ingin mengubah password</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="userStatus" required>
+                                    <option value="active">Aktif</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="suspended">Suspended</option>
+                                    <option value="inactive">Tidak Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancelUserBtn" class="btn-secondary">Batal</button>
+                            <button type="submit" class="btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Job Requirement Modal -->
+    <div id="jobModal" class="modal" style="display: none;">
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="jobModalTitle">Tambah Posisi</h3>
+                    <button id="closeJobModal" class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="jobForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nama Posisi</label>
+                                <input type="text" id="jobPosition" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Pengalaman Minimal (Tahun)</label>
+                                <input type="number" id="jobMinExperience" min="0" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Sertifikasi Wajib</label>
+                            <div id="certificationContainer">
+                                <div class="certification-item">
+                                    <input type="text" class="certification-input" placeholder="Nama sertifikasi">
+                                    <button type="button" class="btn-remove-cert">×</button>
+                                </div>
+                            </div>
+                            <button type="button" id="addCertBtn" class="btn-secondary">+ Tambah Sertifikasi</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Persyaratan Tambahan</label>
+                            <textarea id="additionalRequirements" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Persyaratan Kesehatan</label>
+                            <div id="healthContainer">
+                                <div class="health-item">
+                                    <input type="text" class="health-input" placeholder="Persyaratan kesehatan">
+                                    <button type="button" class="btn-remove-health">×</button>
+                                </div>
+                            </div>
+                            <button type="button" id="addHealthBtn" class="btn-secondary">+ Tambah Persyaratan</button>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancelJobBtn" class="btn-secondary">Batal</button>
+                            <button type="submit" class="btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

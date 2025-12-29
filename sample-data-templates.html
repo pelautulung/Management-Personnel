@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Data Sample - SBTC Zona 5</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .template-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .template-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .template-card:hover {
+            border-color: #0066cc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .template-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #0066cc;
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-download {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .back-link {
+            color: #0066cc;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .sample-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+        
+        .sample-table th, .sample-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .sample-table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+    <script src="js/storage.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="data-management.html" class="back-link">← Kembali ke Data Management</a>
+            <h1>📁 Template Data Sample</h1>
+            <p>Download template CSV siap pakai untuk import data SBTC</p>
+        </div>
+        
+        <div class="template-section">
+            <h2>📥 Download Template CSV</h2>
+            <p>Gunakan template ini sebagai contoh format yang benar untuk import data. Anda bisa mengedit data sesuai kebutuhan.</p>
+            
+            <div class="template-grid">
+                <div class="template-card">
+                    <div class="template-icon">📋</div>
+                    <h3>Template Pengajuan</h3>
+                    <p>Format untuk data pengajuan sertifikasi SBTC dengan semua kolom yang diperlukan</p>
+                    <button class="btn btn-download" onclick="downloadApplicationTemplate()">
+                        📥 Download Template
+                    </button>
+                    <button class="btn btn-success" onclick="generateApplicationSample()">
+                        📄 Lihat Sample Data
+                    </button>
+                </div>
+                
+                <div class="template-card">
+                    <div class="template-icon">🏢</div>
+                    <h3>Template Kontraktor</h3>
+                    <p>Format untuk data perusahaan kontraktor dan informasi kontrak</p>
+                    <button class="btn btn-download" onclick="downloadContractorTemplate()">
+                        📥 Download Template
+                    </button>
+                    <button class="btn btn-success" onclick="generateContractorSample()">
+                        📄 Lihat Sample Data
+                    </button>
+                </div>
+                
+                <div class="template-card">
+                    <div class="template-icon">👤</div>
+                    <h3>Template Personnel</h3>
+                    <p>Format untuk data personnel/pekerja dengan informasi lengkap</p>
+                    <button class="btn btn-download" onclick="downloadPersonnelTemplate()">
+                        📥 Download Template
+                    </button>
+                    <button class="btn btn-success" onclick="generatePersonnelSample()">
+                        📄 Lihat Sample Data
+                    </button>
+                </div>
+                
+                <div class="template-card">
+                    <div class="template-icon">🏆</div>
+                    <h3>Template Sertifikat</h3>
+                    <p>Format untuk data sertifikat yang sudah diterbitkan</p>
+                    <button class="btn btn-download" onclick="downloadCertificateTemplate()">
+                        📥 Download Template
+                    </button>
+                    <button class="btn btn-success" onclick="generateCertificateSample()">
+                        📄 Lihat Sample Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="template-section" id="sampleDataPreview" style="display: none;">
+            <h2>📊 Preview Sample Data</h2>
+            <div id="sampleContent"></div>
+        </div>
+        
+        <div class="template-section">
+            <h2>📋 Petunjuk Penggunaan</h2>
+            
+            <div class="info-box">
+                <h3>🎯 Cara Menggunakan Template</h3>
+                <ol>
+                    <li>Download template CSV yang sesuai dengan jenis data Anda</li>
+                    <li>Buka file CSV dengan Excel atau aplikasi spreadsheet lainnya</li>
+                    <li>Isi data sesuai dengan kolom yang tersedia</li>
+                    <li>Pastikan tidak mengubah nama kolom header</li>
+                    <li>Simpan file dalam format CSV atau Excel</li>
+                    <li>Upload file melalui halaman Data Management</li>
+                </ol>
+            </div>
+            
+            <div class="info-box">
+                <h3>⚠️ Hal Penting yang Perlu Diperhatikan</h3>
+                <ul>
+                    <li><strong>ID harus unik</strong> - Jangan ada ID yang sama</li>
+                    <li><strong>Format tanggal:</strong> YYYY-MM-DD (contoh: 2023-06-15)</li>
+                    <li><strong>Kolom wajib</strong> tidak boleh kosong</li>
+                    <li><strong>Konsistensi data</strong> - Pastikan ID kontraktor dan personnel sudah ada sebelum membuat pengajuan</li>
+                    <li><strong>Status yang valid:</strong> Diajukan, Direview, Disetujui, Ditolak, Sertifikat Terbit</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="template-section">
+            <div style="text-align: center; padding: 20px;">
+                <a href="data-management.html" class="btn btn-primary">
+                    🚀 Mulai Import Data
+                </a>
+                <a href="panduan-data-management.html" class="btn btn-success">
+                    📚 Baca Panduan Lengkap
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Download template functions
+        function downloadApplicationTemplate() {
+            const csvContent = `ID Pengajuan,ID Kontraktor,ID Pekerja,Posisi,Tanggal Pengajuan,Status,Catatan
+APP001,C001,W001,Driller,2023-06-10,Diajukan,Pengajuan baru untuk sertifikasi driller
+APP002,C002,W002,Welder,2023-06-15,Direview,Dalam proses review dokumen
+APP003,C001,W003,Rigger,2023-06-20,Disetujui,Dokumen lengkap dan memenuhi syarat`;
+            
+            downloadCSV(csvContent, 'template_pengajuan_sbtc.csv');
+        }
+        
+        function downloadContractorTemplate() {
+            const csvContent = `ID Kontraktor,Nama Perusahaan,Jenis Usaha,Alamat,Contact Person,Telepon,Email,Nomor Kontrak,Tanggal Mulai Kontrak,Tanggal Akhir Kontrak
+C001,PT Drilling Services Indonesia,Drilling Contractor,"Jl. Industri Raya No. 123, Jakarta Utara",Budi Santoso,081234567890,budi@drilling.com,CTR-2023-001,2023-01-15,2024-01-14
+C002,PT Well Intervention Nusantara,Well Intervention,"Jl. Migas No. 456, Jakarta Selatan",Sari Handayani,087654321098,sari@well.com,CTR-2023-002,2023-03-01,2024-02-28
+C003,PT Marine Support Services,Support Services,"Jl. Pelabuhan No. 789, Jakarta Utara",Ahmad Rahman,081987654321,ahmad@marine.com,CTR-2023-003,2023-02-01,2024-01-31`;
+            
+            downloadCSV(csvContent, 'template_kontraktor_sbtc.csv');
+        }
+        
+        function downloadPersonnelTemplate() {
+            const csvContent = `ID Personnel,ID Kontraktor,Nama Lengkap,NIK,Tanggal Lahir,Posisi,Telepon,Email,Status MCU,Tanggal Kadaluarsa MCU
+W001,C001,Ahmad Kusuma,3671122509880001,1988-09-25,Driller,081234567890,ahmad.kusuma@drilling.com,Valid,2023-12-31
+W002,C002,Sari Handayani,3671120304900002,1990-04-03,Well Intervention Specialist,087654321098,sari.handayani@well.com,Valid,2023-11-30
+W003,C001,Budi Santoso,3671121805850003,1985-05-18,Assistant Driller,081987654321,budi.santoso@drilling.com,Valid,2023-10-15
+W004,C003,Deni Permana,3671123006920004,1992-06-30,Crane Operator,082123456789,deni.permana@marine.com,Valid,2023-09-20`;
+            
+            downloadCSV(csvContent, 'template_personnel_sbtc.csv');
+        }
+        
+        function downloadCertificateTemplate() {
+            const csvContent = `ID Sertifikat,ID Pengajuan,ID Pekerja,ID Kontraktor,Jenis Sertifikat,Tanggal Terbit,Tanggal Kadaluarsa,Status,Nomor Sertifikat
+CERT001,APP002,W002,C002,SBTC,2023-06-18,2024-06-17,Active,SBTC-2023-001
+CERT002,APP003,W003,C001,SBTC,2023-06-25,2024-06-24,Active,SBTC-2023-002
+CERT003,APP004,W004,C003,SBTC,2023-07-02,2024-07-01,Active,SBTC-2023-003`;
+            
+            downloadCSV(csvContent, 'template_sertifikat_sbtc.csv');
+        }
+        
+        // Generate sample data preview
+        function generateApplicationSample() {
+            const sampleHTML = `
+                <h3>📋 Sample Data Pengajuan</h3>
+                <table class="sample-table">
+                    <thead>
+                        <tr>
+                            <th>ID Pengajuan</th>
+                            <th>ID Kontraktor</th>
+                            <th>ID Pekerja</th>
+                            <th>Posisi</th>
+                            <th>Tanggal Pengajuan</th>
+                            <th>Status</th>
+                            <th>Catatan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>APP001</td>
+                            <td>C001</td>
+                            <td>W001</td>
+                            <td>Driller</td>
+                            <td>2023-06-10</td>
+                            <td>Diajukan</td>
+                            <td>Pengajuan baru untuk sertifikasi driller</td>
+                        </tr>
+                        <tr>
+                            <td>APP002</td>
+                            <td>C002</td>
+                            <td>W002</td>
+                            <td>Welder</td>
+                            <td>2023-06-15</td>
+                            <td>Direview</td>
+                            <td>Dalam proses review dokumen</td>
+                        </tr>
+                        <tr>
+                            <td>APP003</td>
+                            <td>C001</td>
+                            <td>W003</td>
+                            <td>Rigger</td>
+                            <td>2023-06-20</td>
+                            <td>Disetujui</td>
+                            <td>Dokumen lengkap dan memenuhi syarat</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            showSampleData(sampleHTML);
+        }
+        
+        function generateContractorSample() {
+            const sampleHTML = `
+                <h3>🏢 Sample Data Kontraktor</h3>
+                <table class="sample-table">
+                    <thead>
+                        <tr>
+                            <th>ID Kontraktor</th>
+                            <th>Nama Perusahaan</th>
+                            <th>Jenis Usaha</th>
+                            <th>Alamat</th>
+                            <th>Contact Person</th>
+                            <th>Telepon</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>C001</td>
+                            <td>PT Drilling Services Indonesia</td>
+                            <td>Drilling Contractor</td>
+                            <td>Jl. Industri Raya No. 123, Jakarta Utara</td>
+                            <td>Budi Santoso</td>
+                            <td>081234567890</td>
+                            <td>budi@drilling.com</td>
+                        </tr>
+                        <tr>
+                            <td>C002</td>
+                            <td>PT Well Intervention Nusantara</td>
+                            <td>Well Intervention</td>
+                            <td>Jl. Migas No. 456, Jakarta Selatan</td>
+                            <td>Sari Handayani</td>
+                            <td>087654321098</td>
+                            <td>sari@well.com</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            showSampleData(sampleHTML);
+        }
+        
+        function generatePersonnelSample() {
+            const sampleHTML = `
+                <h3>👤 Sample Data Personnel</h3>
+                <table class="sample-table">
+                    <thead>
+                        <tr>
+                            <th>ID Personnel</th>
+                            <th>ID Kontraktor</th>
+                            <th>Nama Lengkap</th>
+                            <th>NIK</th>
+                            <th>Tanggal Lahir</th>
+                            <th>Posisi</th>
+                            <th>Telepon</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>W001</td>
+                            <td>C001</td>
+                            <td>Ahmad Kusuma</td>
+                            <td>3671122509880001</td>
+                            <td>1988-09-25</td>
+                            <td>Driller</td>
+                            <td>081234567890</td>
+                            <td>ahmad.kusuma@drilling.com</td>
+                        </tr>
+                        <tr>
+                            <td>W002</td>
+                            <td>C002</td>
+                            <td>Sari Handayani</td>
+                            <td>3671120304900002</td>
+                            <td>1990-04-03</td>
+                            <td>Well Intervention Specialist</td>
+                            <td>087654321098</td>
+                            <td>sari.handayani@well.com</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            showSampleData(sampleHTML);
+        }
+        
+        function generateCertificateSample() {
+            const sampleHTML = `
+                <h3>🏆 Sample Data Sertifikat</h3>
+                <table class="sample-table">
+                    <thead>
+                        <tr>
+                            <th>ID Sertifikat</th>
+                            <th>ID Pengajuan</th>
+                            <th>ID Pekerja</th>
+                            <th>Jenis Sertifikat</th>
+                            <th>Tanggal Terbit</th>
+                            <th>Tanggal Kadaluarsa</th>
+                            <th>Status</th>
+                            <th>Nomor Sertifikat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CERT001</td>
+                            <td>APP002</td>
+                            <td>W002</td>
+                            <td>SBTC</td>
+                            <td>2023-06-18</td>
+                            <td>2024-06-17</td>
+                            <td>Active</td>
+                            <td>SBTC-2023-001</td>
+                        </tr>
+                        <tr>
+                            <td>CERT002</td>
+                            <td>APP003</td>
+                            <td>W003</td>
+                            <td>SBTC</td>
+                            <td>2023-06-25</td>
+                            <td>2024-06-24</td>
+                            <td>Active</td>
+                            <td>SBTC-2023-002</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            showSampleData(sampleHTML);
+        }
+        
+        function showSampleData(content) {
+            document.getElementById('sampleContent').innerHTML = content;
+            document.getElementById('sampleDataPreview').style.display = 'block';
+            document.getElementById('sampleDataPreview').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

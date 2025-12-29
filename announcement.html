@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengumuman Update Terbaru - SBTC Zona 5</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+            background-image: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+        
+        .announcement-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .update-feature {
+            background-color: #f9f9f9;
+            border-left: 4px solid #0066cc;
+            border-radius: 0 8px 8px 0;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .update-feature h3 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card h3 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background-color: #0066cc;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0052cc;
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .screenshot {
+            width: 100%;
+            max-width: 800px;
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eee;
+        }
+        
+        .highlight-box {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #bbdefb;
+        }
+        
+        .action-center {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .back-link {
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script src="js/storage.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-link">← Kembali ke Dashboard</a>
+            <h1>🎉 Pengumuman Update Terbaru SBTC Zona 5</h1>
+            <p>Versi 2.1.0 - Lebih Banyak Fitur, Lebih Banyak Kemudahan</p>
+        </div>
+        
+        <div class="announcement-section">
+            <h2>✨ Fitur Baru & Peningkatan</h2>
+            <p>Platform SBTC Zona 5 telah diperbarui dengan fitur-fitur baru yang akan membantu Anda mengelola data sertifikasi secara lebih efisien. Berikut adalah ringkasan update terbaru:</p>
+            
+            <div class="update-feature">
+                <h3>📊 Data Management System</h3>
+                <p>Sekarang Anda bisa mengimpor data dari Excel atau CSV dan data akan tersimpan di Local Storage browser. Fitur ini memudahkan Anda untuk:</p>
+                <ul>
+                    <li>Mengimpor data personel, kontraktor, pengajuan, dan sertifikat sekaligus</li>
+                    <li>Melakukan mapping kolom dari file Excel/CSV ke sistem SBTC</li>
+                    <li>Menyimpan data secara otomatis di browser Anda</li>
+                    <li>Mengekspor data ke format CSV untuk backup</li>
+                </ul>
+                <p><a href="data-management.html" class="btn btn-primary">Coba Data Management</a></p>
+            </div>
+            
+            <div class="update-feature">
+                <h3>📈 Real-time Dashboard</h3>
+                <p>Dashboard telah ditingkatkan dengan perhitungan data yang lebih akurat dan real-time:</p>
+                <ul>
+                    <li>Persentase perubahan dihitung berdasarkan data aktual</li>
+                    <li>Perbandingan statistik antar periode waktu</li>
+                    <li>Visualisasi status pengajuan dengan progress bar</li>
+                    <li>Tampilan yang lebih intuitif dan informatif</li>
+                </ul>
+            </div>
+            
+            <div class="update-feature">
+                <h3>📝 Form Pengajuan SBTC Komprehensif</h3>
+                <p>Form pengajuan SBTC telah ditingkatkan dengan:</p>
+                <ul>
+                    <li>Data personel yang lebih lengkap</li>
+                    <li>Informasi perusahaan dan kontrak</li>
+                    <li>Daftar posisi untuk Departemen Drilling & Well Intervention</li>
+                    <li>Upload dokumen kompetensi, HSSE, SIKA, dan dokumen pendukung</li>
+                    <li>Fitur review sebelum submit</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="announcement-section">
+            <h2>🚀 Mulai Menggunakan Fitur Baru</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Data Management</h3>
+                    <p>Impor data dari Excel/CSV, kelola data secara efisien, dan lihat statistik real-time.</p>
+                    <a href="data-management.html" class="btn btn-primary">Buka Data Management</a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Panduan Lengkap</h3>
+                    <p>Pelajari cara menggunakan fitur baru dengan panduan langkah demi langkah.</p>
+                    <a href="panduan-data-management.html" class="btn btn-primary">Baca Panduan</a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3>Template Data</h3>
+                    <p>Download template CSV siap pakai untuk memudahkan proses import data.</p>
+                    <a href="sample-data-templates.html" class="btn btn-primary">Download Template</a>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3>💡 Menggunakan Local Storage</h3>
+                <p>Fitur Data Management menggunakan teknologi Local Storage yang memiliki beberapa keuntungan:</p>
+                <ul>
+                    <li>Data tersimpan di browser Anda secara lokal</li>
+                    <li>Tidak memerlukan koneksi internet untuk mengakses data</li>
+                    <li>Performa akses data sangat cepat</li>
+                    <li>Data tetap ada meskipun browser ditutup</li>
+                </ul>
+                <p><strong>Catatan:</strong> Data hanya tersimpan di browser dan komputer ini saja. Disarankan untuk melakukan backup secara berkala dengan fitur Export.</p>
+            </div>
+            
+            <div class="action-center">
+                <a href="data-management.html" class="btn btn-primary">Mulai Gunakan Fitur Baru</a>
+                <a href="index.html" class="btn btn-secondary">Kembali ke Dashboard</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
