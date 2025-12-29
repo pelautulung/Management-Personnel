@@ -2,123 +2,201 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
 {
+    /**
+     * Get all companies
+     * GET /api/companies
+     */
     public function index(Request $request)
     {
-        $query = Company::withCount(['users', 'personnel']);
+        try {
+            $query = Company::query();
 
-        // Search
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('company_name', 'like', "%{$search}%")
-                  ->orWhere('company_code', 'like', "%{$search}%");
-            });
+            // Search
+            if ($request->has('search')) {
+                $search = $request->get('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%");
+                });
+            }
+
+            // Filter active only
+            if ($request->get('active_only') == 'true') {
+                $query->where('status', 'active');
+            }
+
+            $companies = $query->paginate(15);
+
+            return response()->json([
+                'success' => true,
+                'data' => $companies,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get companies error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
         }
-
-        // Filter active only
-        if ($request->has('active_only') && $request->active_only) {
-            $query->active();
-        }
-
-        $companies = $query->latest()->paginate($request->get('per_page', 15));
-
-        return response()->json([
-            'success' => true,
-            'data' => $companies,
-        ]);
     }
 
+    /**
+     * Get single company by ID
+     * GET /api/companies/{id}
+     */
+    public function show(Request $request, $id)
+    {
+        try {
+            $company = Company::with('personnel')->find($id);
+
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company not found',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $company,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get company error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
+    }
+
+    /**
+     * Create new company
+     * POST /api/companies
+     */
     public function store(Request $request)
     {
-        // Only superadmin can create companies
-        if (!$request->user()->isSuperAdmin()) {
+        try {
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'code' => 'required|string|unique:companies|max:50',
+                'email' => 'nullable|email|max:255',
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:500',
+                'status' => 'required|in:active,inactive',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $company = Company::create($request->all());
+            Log::info('Company created', ['company_id' => $company->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Company created successfully',
+                'data' => $company,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Create company error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized to create companies',
-            ], 403);
+                'message' => 'Server error',
+            ], 500);
         }
-
-        $validated = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'company_code' => 'required|string|max:50|unique:companies',
-            'address' => 'nullable|string',
-            'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-        ]);
-
-        $company = Company::create($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Company created successfully',
-            'data' => $company,
-        ], 201);
     }
 
-    public function show($id)
-    {
-        $company = Company::withCount(['users', 'personnel'])
-                          ->with(['users', 'personnel'])
-                          ->findOrFail($id);
-
-        return response()->json([
-            'success' => true,
-            'data' => $company,
-        ]);
-    }
-
+    /**
+     * Update company
+     * PUT /api/companies/{id}
+     */
     public function update(Request $request, $id)
     {
-        if (!$request->user()->isSuperAdmin()) {
+        try {
+            $company = Company::find($id);
+
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company not found',
+                ], 404);
+            }
+
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'name' => 'sometimes|required|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:500',
+                'status' => 'sometimes|required|in:active,inactive',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $company->update($request->all());
+            Log::info('Company updated', ['company_id' => $company->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Company updated successfully',
+                'data' => $company,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Update company error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized to update companies',
-            ], 403);
+                'message' => 'Server error',
+            ], 500);
         }
-
-        $company = Company::findOrFail($id);
-
-        $validated = $request->validate([
-            'company_name' => 'sometimes|string|max:255',
-            'company_code' => 'sometimes|string|max:50|unique:companies,company_code,' . $id,
-            'address' => 'nullable|string',
-            'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'is_active' => 'sometimes|boolean',
-        ]);
-
-        $company->update($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Company updated successfully',
-            'data' => $company->fresh(),
-        ]);
     }
 
-    public function destroy($id)
+    /**
+     * Delete company
+     * DELETE /api/companies/{id}
+     */
+    public function destroy(Request $request, $id)
     {
-        if (!$request->user()->isSuperAdmin()) {
+        try {
+            $company = Company::find($id);
+
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company not found',
+                ], 404);
+            }
+
+            $company->delete();
+            Log::info('Company deleted', ['company_id' => $id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Company deleted successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Delete company error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized to delete companies',
-            ], 403);
+                'message' => 'Server error',
+            ], 500);
         }
-
-        $company = Company::findOrFail($id);
-        $company->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Company deleted successfully',
-        ]);
     }
 }
