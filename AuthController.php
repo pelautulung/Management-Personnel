@@ -1,136 +1,202 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'username' => 'required|string|unique:users',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'full_name' => 'required|string',
-            'role' => 'required|in:superadmin,admin,contractor',
-            'company_id' => 'required_if:role,contractor|exists:companies,id',
-        ]);
-
-        $user = User::create([
-            'username' => $validated['username'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'full_name' => $validated['full_name'],
-            'role' => $validated['role'],
-            'company_id' => $validated['company_id'] ?? null,
-        ]);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User registered successfully',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-            ],
-        ], 201);
-    }
-
+    /**
+     * Login user with email and password
+     * POST /api/auth/login
+     */
     public function login(Request $request)
     {
         try {
-            $request->validate([
-                'username' => 'required|string',
-                'password' => 'required|string',
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email|max:255',
+                'password' => 'required|string|min:6',
             ]);
 
-            Log::info('Login attempt', ['username' => $request->username, 'ip' => $request->ip()]);
-
-            $user = User::where('username', $request->username)->first();
-
-            if (!$user || !Hash::check($request->password, $user->password)) {
-                throw ValidationException::withMessages([
-                    'username' => ['The provided credentials are incorrect.'],
-                ]);
-            }
-
-            if (!$user->is_active) {
+            if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Your account has been deactivated',
-                ], 403);
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
             }
 
-            // Delete old tokens
-            $user->tokens()->delete();
+            $credentials = $request->only('email', 'password');
 
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            // Try to eager-load `company` if the relationship is present, but
-            // don't let a missing/invalid relation break the login flow.
-            $userData = $user;
-            if (method_exists($user, 'company')) {
-                try {
-                    $userData = $user->load('company');
-                } catch (\Throwable $relEx) {
-                    Log::warning('Could not load company relation for user', ['user_id' => $user->id, 'error' => $relEx->getMessage()]);
-                }
+            if (!Auth::attempt($credentials)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid email or password',
+                ], 401);
             }
+
+            $user = Auth::user();
+            Log::info('User logged in', ['user_id' => $user->id]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Login successful',
-                'data' => [
-                    'user' => $userData,
-                    'token' => $token,
-                ],
-            ]);
-        } catch (ValidationException $ve) {
-            throw $ve; // let validation exceptions be handled by framework (422)
-        } catch (\Throwable $e) {
-            Log::error('Login error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            $msg = config('app.debug') ? $e->getMessage() : 'Internal server error';
-            return response()->json(['success' => false, 'message' => $msg], 500);
+                'user' => $user,
+                'token' => $user->createToken('auth_token')->plainTextToken,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
         }
     }
 
+    /**
+     * Register new user
+     * POST /api/auth/register
+     */
+    public function register(Request $request)
+    {
+        try {
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'username' => 'required|string|unique:users|max:255',
+                'email' => 'required|email|unique:users|max:255',
+                'password' => 'required|string|min:8|confirmed',
+                'full_name' => 'required|string|max:255',
+                'role' => 'required|in:superadmin,admin,contractor',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'full_name' => $request->full_name,
+                'role' => $request->role,
+                'status' => 'active',
+            ]);
+
+            Log::info('User registered', ['user_id' => $user->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful',
+                'user' => $user,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Registration error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
+    }
+
+    /**
+     * Logout user
+     * POST /api/auth/logout
+     */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            // Revoke all tokens
+            if ($request->user()) {
+                $request->user()->tokens()->delete();
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logged out successfully',
-        ]);
+            Log::info('User logged out', ['user_id' => $request->user()->id ?? null]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Logout successful',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Logout error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
     }
 
-    public function me(Request $request)
+    /**
+     * Get current authenticated user
+     * GET /api/auth/user
+     */
+    public function user(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'data' => $request->user()->load('company'),
-        ]);
+        try {
+            if (!$request->user()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
+
+            return response()->json([
+                'success' => true,
+                'user' => $request->user(),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get user error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
     }
 
-    public function refresh(Request $request)
+    /**
+     * Refresh authentication token
+     * POST /api/auth/refresh-token
+     */
+    public function refreshToken(Request $request)
     {
-        $user = $request->user();
-        $user->tokens()->delete();
-        $token = $user->createToken('auth_token')->plainTextToken;
+        try {
+            if (!$request->user()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Token refreshed successfully',
-            'data' => [
+            // Revoke old token
+            $request->user()->currentAccessToken()->delete();
+
+            // Create new token
+            $token = $request->user()->createToken('auth_token')->plainTextToken;
+
+            // Log the action
+            Log::info('Token refreshed', ['user_id' => $request->user()->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Token refreshed successfully',
                 'token' => $token,
-            ],
-        ]);
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Token refresh error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+            ], 500);
+        }
     }
 }
